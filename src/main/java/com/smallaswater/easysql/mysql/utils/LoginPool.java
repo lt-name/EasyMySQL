@@ -1,7 +1,6 @@
 package com.smallaswater.easysql.mysql.utils;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-
+import com.alibaba.druid.pool.DruidDataSource;
 import com.smallaswater.easysql.mysql.manager.SqlManager;
 
 /**
@@ -11,16 +10,16 @@ import com.smallaswater.easysql.mysql.manager.SqlManager;
  */
 public class LoginPool {
 
-    public ComboPooledDataSource dataSource = new ComboPooledDataSource();
-    private String user;
+    public DruidDataSource dataSource = new DruidDataSource();
+    private final String user;
 
-    private String ip;
+    private final String ip;
 
-    private String database;
+    private final String database;
 
     private SqlManager manager;
 
-    public LoginPool(String ip,String user,String database){
+    public LoginPool(String ip, String user, String database) {
         this.ip = ip;
         this.user = user;
         this.database = database;
@@ -35,8 +34,8 @@ public class LoginPool {
     }
 
     @Override
-    public boolean equals(Object pool){
-        if(pool instanceof LoginPool) {
+    public boolean equals(Object pool) {
+        if (pool instanceof LoginPool) {
             return ((LoginPool) pool).database.equalsIgnoreCase(database) &&
                     ((LoginPool) pool).user.equalsIgnoreCase(user) &&
                     ((LoginPool) pool).ip.equalsIgnoreCase(ip);
