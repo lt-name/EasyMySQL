@@ -6,37 +6,41 @@ import com.smallaswater.easysql.exceptions.MySqlLoginException;
 import com.smallaswater.easysql.mysql.BaseMySql;
 import com.smallaswater.easysql.mysql.utils.TableType;
 import com.smallaswater.easysql.mysql.utils.UserData;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
+ * BaseMySql的实现类
+ *
  * @author SmallasWater
  */
 public class SqlManager extends BaseMySql {
 
     private boolean isEnable = false;
 
-    public SqlManager(Plugin plugin, String configTableName, UserData data) throws MySqlLoginException {
+    public SqlManager(@NotNull Plugin plugin, @NotNull UserData data) throws MySqlLoginException {
         super(plugin, data);
-        if (connect()) {
-            this.form = configTableName;
+        if (this.connect()) {
+            this.isEnable = true;
         }
-
     }
 
+    @Deprecated
+    public SqlManager(Plugin plugin, String configTableName, UserData data) throws MySqlLoginException {
+        this(plugin, configTableName, data, (TableType) null);
+    }
 
-    public SqlManager(Plugin plugin, String configTableName, UserData data, TableType... table) throws MySqlLoginException {
+    @Deprecated
+    public SqlManager(@NotNull Plugin plugin, String configTableName, @NotNull UserData data, TableType... table) throws MySqlLoginException {
         super(plugin, data);
-        if (connect()) {
-            isEnable = true;
-            this.form = configTableName;
-            if (table.length > 0) {
-                if (createTable(getConnection(), configTableName, BaseMySql.getDefaultTable(table))) {
+        if (this.connect()) {
+            this.isEnable = true;
+            if (configTableName != null && !configTableName.trim().equals("") && table.length > 0) {
+                if (this.createTable(configTableName, BaseMySql.getDefaultTable(table))) {
                     plugin.getLogger().info("创建数据表" + configTableName + "成功");
                 }
             }
         }
-
-
     }
 
     /**
@@ -46,16 +50,14 @@ public class SqlManager extends BaseMySql {
      * @param data 用户配置
      * @param configTableName 数据库表名
      */
+    @Deprecated
     public SqlManager(Plugin plugin, UserData data, String configTableName) throws MySqlLoginException {
         super(plugin, data);
-        if (connect()) {
-            this.form = configTableName;
-            if (createTable(getConnection(), configTableName, BaseMySql.getDefaultConfig())) {
+        if (this.connect()) {
+            if (createTable(configTableName, BaseMySql.getDefaultConfig())) {
                 plugin.getLogger().info("创建数据表成功");
             }
         }
-
-
     }
 
     public boolean isEnable() {
@@ -65,7 +67,7 @@ public class SqlManager extends BaseMySql {
     public void disable() {
         PluginManager.getList().remove(this);
         this.shutdown();
+        this.isEnable = false;
     }
-
 
 }
