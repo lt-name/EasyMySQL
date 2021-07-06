@@ -301,7 +301,7 @@ public class SqlDataManager {
      * @param tableName 表名
      * @param database  数据库名
      */
-    public static boolean isTableColumnData(LoginPool loginPool, String tableName, String database) {
+    public static boolean isTableColumnData(LoginPool loginPool, String database, String tableName) {
         if (tableName != null && !"".equalsIgnoreCase(tableName.trim())) {
             throw new NullPointerException();
         }
@@ -318,7 +318,7 @@ public class SqlDataManager {
      * @param data  数据
      * @param where 参数判断
      */
-    public static boolean setData(LoginPool loginPool, SqlData data, SqlData where, String tableName) {
+    public static boolean setData(LoginPool loginPool, String tableName, SqlData data, SqlData where) {
         ArrayList<ChunkSqlType> objects = new ArrayList<>();
         int i = 1;
         for (Map.Entry<String, Object> data1 : data.getData().entrySet()) {
@@ -341,7 +341,7 @@ public class SqlDataManager {
      * @param tableName 表单名称
      * @return 是否添加成功
      */
-    public static boolean insertData(LoginPool loginPool, SqlData data, String tableName) {
+    public static boolean insertData(LoginPool loginPool, String tableName, SqlData data) {
         String column = data.getColumnToString();
         String values = data.getObjectToString();
         StringBuilder builder = new StringBuilder("INSERT INTO ").append(tableName).append(" (").append(column).append(") VALUES (");
@@ -366,9 +366,9 @@ public class SqlDataManager {
      * @param tableName 表单名称
      * @return 是否添加成功
      */
-    public static boolean insertData(LoginPool loginPool, LinkedList<SqlData> datas, String tableName) {
+    public static boolean insertData(LoginPool loginPool, String tableName, LinkedList<SqlData> datas) {
         for (SqlData data : datas) {
-            THREAD_POOL.execute(() -> insertData(loginPool, data, tableName));
+            THREAD_POOL.execute(() -> insertData(loginPool, tableName, data));
         }
         return true;
     }
@@ -376,11 +376,11 @@ public class SqlDataManager {
     /**
      * 删除数据
      *
-     * @param data      数据
      * @param tableName 表单名称
+     * @param data      数据
      * @return 是否删除成功
      */
-    public static boolean deleteData(LoginPool loginPool, SqlData data, String tableName) {
+    public static boolean deleteData(LoginPool loginPool, String tableName, SqlData data) {
         StringBuilder cmd = new StringBuilder("DELETE FROM " + tableName + " WHERE ");
         ArrayList<ChunkSqlType> objects = new ArrayList<>();
         int i = 0;

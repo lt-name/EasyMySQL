@@ -5,6 +5,7 @@ import cn.nukkit.plugin.Plugin;
 import com.smallaswater.easysql.EasySql;
 import com.smallaswater.easysql.exceptions.MySqlLoginException;
 import com.smallaswater.easysql.mysql.data.SqlData;
+import com.smallaswater.easysql.mysql.data.SqlDataList;
 import com.smallaswater.easysql.mysql.data.SqlDataManager;
 import com.smallaswater.easysql.mysql.manager.PluginManager;
 import com.smallaswater.easysql.mysql.utils.*;
@@ -239,7 +240,7 @@ public abstract class BaseMySql {
      * @param tableName 表单名称
      * @return 删除一个字段
      */
-    public boolean deleteColumn(String args, String tableName) {
+    public boolean deleteColumn(String tableName, String args) {
         String command = "ALTER TABLE " + tableName + " DROP ?";
         return this.executeSql(command, new ChunkSqlType(1, args));
     }
@@ -251,53 +252,58 @@ public abstract class BaseMySql {
     /**
      * 修改数据
      *
+     * @param tableName 表单名称
      * @param data  数据
      * @param where 参数判断
-     * @param tableName 表单名称
      * @return 是否修改成功
      */
-    public boolean setData(SqlData data, SqlData where, String tableName) {
-        return SqlDataManager.setData(this.pool, data, where, tableName);
+    public boolean setData(String tableName, SqlData data, SqlData where) {
+        return SqlDataManager.setData(this.pool, tableName, data, where);
     }
 
     /**
      * 添加数据
      *
-     * @param data 数据
      * @param tableName 表单名称
+     * @param data 数据
      * @return 是否添加成功
      */
-    public boolean insertData(SqlData data, String tableName) {
-        return SqlDataManager.insertData(this.pool, data, tableName);
+    public boolean insertData(String tableName, SqlData data) {
+        return SqlDataManager.insertData(this.pool, tableName, data);
     }
 
     /**
      * 添加多条数据
      *
-     * @param datas     数据列表
      * @param tableName 表单名称
+     * @param datas     数据列表
      * @return 是否添加成功
      */
-    public boolean insertData(LinkedList<SqlData> datas, String tableName) {
-        return SqlDataManager.insertData(this.pool, datas, tableName);
+    public boolean insertData(String tableName, LinkedList<SqlData> datas) {
+        return SqlDataManager.insertData(this.pool, tableName, datas);
     }
 
-
-
-    public boolean deleteData(SqlData data, String tableName) {
-        return SqlDataManager.deleteData(this.pool, data, tableName);
+    /**
+     * 删除数据
+     *
+     * @param tableName 表单名称
+     * @param data 数据
+     * @return 是否删除成功
+     */
+    public boolean deleteData(String tableName, SqlData data) {
+        return SqlDataManager.deleteData(this.pool, tableName, data);
     }
 
     /**
      * 获取数据条数
      */
-    public int getDataSize(String sql, String form,ChunkSqlType... sqlType) {
+    public int getDataSize(String sql, String tableName, ChunkSqlType... sqlType) {
         int i = 0;
         Connection connection = this.getConnection();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
-            preparedStatement = connection.prepareStatement("SELECT COUNT(*) FROM " + form + " " + sql);
+            preparedStatement = connection.prepareStatement("SELECT COUNT(*) FROM " + tableName + " " + sql);
             for(ChunkSqlType type: sqlType) {
                 preparedStatement.setString(type.getI(),type.getValue());
             }
@@ -333,6 +339,17 @@ public abstract class BaseMySql {
             }
         }
         return i;
+    }
+
+    /**
+     * 获取数据
+     *
+     * @param command 执行查询SQL指令
+     * @param types 参数
+     * @return 数据
+     */
+    public SqlDataList<SqlData> getData(String command, ChunkSqlType... types) {
+        return SqlDataManager.selectExecute(this.pool, command, types);
     }
 
 }
