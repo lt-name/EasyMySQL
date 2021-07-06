@@ -2,6 +2,7 @@ package com.smallaswater.easysql.mysql.data;
 
 
 import com.smallaswater.easysql.mysql.utils.ChunkSqlType;
+import com.smallaswater.easysql.mysql.utils.LoginPool;
 import com.smallaswater.easysql.mysql.utils.MySqlFunctions;
 import org.intellij.lang.annotations.Language;
 
@@ -25,7 +26,7 @@ public class SqlDataManager {
 
     private static final ThreadPoolExecutor THREAD_POOL = new ThreadPoolExecutor(5, 20, 60, TimeUnit.SECONDS, QUEUE, new ThreadPoolExecutor.AbortPolicy());
 
-    private final Connection connection;
+    private final LoginPool loginPool;
 
     private final String database;
 
@@ -33,9 +34,9 @@ public class SqlDataManager {
 
     private PreparedStatement preparedStatement;
 
-    public SqlDataManager(String database, String tableName, Connection connection) {
+    public SqlDataManager(String database, String tableName, LoginPool connection) {
         this.tableName = tableName;
-        this.connection = connection;
+        this.loginPool = connection;
         this.database = database;
     }
 
@@ -80,7 +81,7 @@ public class SqlDataManager {
         if (form != null && !"".equalsIgnoreCase(form)) {
             tableName = form;
         }
-        String sql = "SELECT " + column + " FROM " + tableName;
+        @Language("SQL") String sql = "SELECT " + column + " FROM " + tableName;
         if (where != null && !"".equalsIgnoreCase(where)) {
             sql = sql + " WHERE " + where;
         }
@@ -165,11 +166,13 @@ public class SqlDataManager {
      * @param commands @Language("SQL")
      *
      *
+     *this.c
      */
     public SqlDataList<SqlData> selectExecute(@Language("SQL") String commands, ChunkSqlType... types) {
         SqlDataList<SqlData> objects = new SqlDataList<>(commands, types);
-        Connection connection = this.connection;
+        Connection connection;
         try {
+            connection = this.loginPool.dataSource.getConnection();
             this.preparedStatement = connection.prepareStatement(commands);
             if (types.length > 0) {
                 for (ChunkSqlType types1 : types) {
@@ -215,7 +218,7 @@ public class SqlDataManager {
      * @return 是否存在
      */
     public boolean isExists(String column, String data) {
-        String sql = "SELECT " + MySqlFunctions.getFunction(MySqlFunctions.SqlFunctions.COUNT, "*") + " c FROM " + tableName + " WHERE " + column + " = ?";
+        @Language("SQL") String sql = "SELECT " + MySqlFunctions.getFunction(MySqlFunctions.SqlFunctions.COUNT, "*") + " c FROM " + tableName + " WHERE " + column + " = ?";
         return selectExecute(sql, new ChunkSqlType(1, data)).get().getInt("c") > 0;
     }
 
@@ -298,10 +301,12 @@ public class SqlDataManager {
      * @param sql   SQL 语句
      * @param value 防SQL注入
      * @return 是否执行成功
+     * 通过线程池调用 Connection
      */
     public boolean runSql(@Language("SQL") String sql, ChunkSqlType... value) {
-        Connection connection = this.connection;
+        Connection connection;
         try {
+             connection = this.loginPool.dataSource.getConnection();
             this.preparedStatement = connection.prepareStatement(sql);
             for (ChunkSqlType type : value) {
                 this.preparedStatement.setString(type.getI(), type.getValue());
@@ -314,11 +319,15 @@ public class SqlDataManager {
             System.out.println("执行 " + sql + " 语句出现异常");
             System.out.println(e.getMessage());
         } finally {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            /**
+             * 不要关闭 connection*/
+//            try {
+//                if(connection != null) {
+//                    connection.close();
+//                }
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
 
         }
         return false;
@@ -363,7 +372,7 @@ public class SqlDataManager {
         if (database != null && !"".equalsIgnoreCase(database)) {
             data = database;
         }
-        String command = "SELECT * FROM information_schema.TABLES  WHERE table_schema =? AND table_name = ?";
+        @Language("SQL") String command = "SELECT * FROM information_schema.TABLES  WHERE table_schema =? AND table_name = ?";
         return selectExecute(command, new ChunkSqlType(1, data), new ChunkSqlType(2, tableName)).size() == 0;
     }
 
@@ -386,7 +395,7 @@ public class SqlDataManager {
             i++;
         }
 
-        String sql = "UPDATE " + tableName + " SET " + getUpDataColumn(data) + " WHERE " + getUpDataWhere(where);
+        @Language("SQL") String sql = "UPDATE " + tableName + " SET " + getUpDataColumn(data) + " WHERE " + getUpDataWhere(where);
         return runSql(sql, objects.toArray(new ChunkSqlType[]{}));
     }
 
@@ -418,7 +427,7 @@ public class SqlDataManager {
     public boolean insertData(SqlData data, String tableName) {
         String column = data.getColumnToString();
         String values = data.getObjectToString();
-        String sql = "INSERT INTO " + tableName + " (" + column + ") VALUES (?)";
+        @Language("SQL") String sql = "INSERT INTO " + tableName + " (" + column + ") VALUES (?)";
         return runSql(sql, new ChunkSqlType(1, values));
     }
 
@@ -441,7 +450,7 @@ public class SqlDataManager {
      * @param functions 自定义的函数 例如 COUNT(*)
      * @return 返回值
      */
-    public SqlData executeFunction(String functions) {
+    public SqlData executeFunction(@Language("SQL") String functions) {
         return selectExecute(functions).get();
     }
 }

@@ -31,7 +31,7 @@ public class SqlEnable {
     @Deprecated
     public SqlEnable(@NotNull Plugin plugin, String tableName, UserData data, TableType... table) throws MySqlLoginException {
         this.data = data;
-        this.manager = new SqlManager(plugin, data);
+        this.manager = new SqlManager(plugin,tableName, data);
         if (tableName != null && !"".equals(tableName.trim()) && table.length > 0) {
             if (this.manager.createTable(tableName, BaseMySql.getDefaultTable(table))) {
                 plugin.getLogger().info("创建数据表" + tableName + "成功");

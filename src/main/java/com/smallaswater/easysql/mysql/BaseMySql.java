@@ -26,6 +26,8 @@ public abstract class BaseMySql {
 
     private final Plugin plugin;
 
+    protected String tableName;
+
     protected LoginPool pool;
 
     public BaseMySql(@NotNull Plugin plugin, @NotNull UserData data) {
@@ -61,7 +63,6 @@ public abstract class BaseMySql {
 
         try {
             this.pool = EasySql.getLoginPool(data);
-
             Class.forName("com.mysql.cj.jdbc.Driver");
             this.pool.dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
             this.pool.dataSource.setUrl("jdbc:mysql://" + this.data.getHost() + ':' + this.data.getPort() + '/' + this.data.getDatabase() + "?&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT&characterEncoding=utf8&useSSL=false");
@@ -117,7 +118,15 @@ public abstract class BaseMySql {
     }
 
     public SqlDataManager getSqlDataManager(String form) {
-        return new SqlDataManager(this.data.getDatabase(), form, this.getConnection());
+        return new SqlDataManager(this.data.getDatabase(), form, this.pool);
+    }
+
+    /**
+     * 保留旧版方法
+     * */
+    @Deprecated
+    public SqlDataManager getSqlManager() {
+        return new SqlDataManager(this.data.getDatabase(), tableName, this.pool);
     }
 
     /**
@@ -125,7 +134,7 @@ public abstract class BaseMySql {
      * 可以通过直接查询里的封装方法
      * */
     public SqlDataManager getSqlDataManager() {
-        return new SqlDataManager(this.data.getDatabase(), "", this.getConnection());
+        return new SqlDataManager(this.data.getDatabase(), tableName, this.pool);
     }
 
 
@@ -157,6 +166,7 @@ public abstract class BaseMySql {
         }
     }
 
+
     /**
      * 创建表单 SQL指令 每个args代表指令中的 ?
      *
@@ -179,7 +189,7 @@ public abstract class BaseMySql {
 
     @Deprecated
     public boolean createTable(Connection connection, String... args) {
-        @Language("SQL") String command = "CREATE TABLE " + args[0] + "(?)engine=InnoDB default charset=utf8";
+        String command = "CREATE TABLE " + args[0] + "(?)engine=InnoDB default charset=utf8";
         try {
             ResultSet resultSet = connection.getMetaData().getTables(null, null, args[0], null);
             if (!resultSet.next()) {
@@ -240,6 +250,20 @@ public abstract class BaseMySql {
         String command = "ALTER TABLE " + form + " ADD " + args + " " + types.toString();
         return this.getSqlDataManager(form).runSql(command);
     }
+
+    /**
+     * 给表增加字段
+     *
+     * @param types 字段参数
+     * @param args  字段名
+     * @return 增加一个字段
+     */
+    public boolean createColumn(Types types, String args) {
+        String command = "ALTER TABLE " + tableName + " ADD " + args + " " + types.toString();
+        return this.getSqlDataManager(tableName).runSql(command);
+    }
+
+
 
     /**
      * 给表删除字段

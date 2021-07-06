@@ -22,11 +22,13 @@ public class UseTableSqlManager extends SqlManager {
         this.tableName = tableName;
     }
 
+    @Override
     @Deprecated
     public SqlDataManager getSqlManager() {
         return super.getSqlDataManager(this.tableName);
     }
 
+    @Override
     public SqlDataManager getSqlDataManager() {
         return super.getSqlDataManager(this.tableName);
     }
@@ -38,6 +40,7 @@ public class UseTableSqlManager extends SqlManager {
      * @param args  字段名
      * @return 增加一个字段
      */
+    @Override
     public boolean createColumn(Types types, String args) {
         return super.createColumn(types, this.tableName, args);
     }

@@ -25,16 +25,17 @@ public class SqlManager extends BaseMySql {
         }
     }
 
-    @Deprecated
-    public SqlManager(Plugin plugin, String configTableName, UserData data) throws MySqlLoginException {
-        this(plugin, configTableName, data, (TableType) null);
-    }
+//    @Deprecated
+//    public SqlManager(Plugin plugin, String configTableName, UserData data) throws MySqlLoginException {
+//        this(plugin, configTableName, data, (TableType) null);
+//    }
 
     @Deprecated
     public SqlManager(@NotNull Plugin plugin, String configTableName, @NotNull UserData data, TableType... table) throws MySqlLoginException {
         super(plugin, data);
         if (this.connect()) {
             this.isEnable = true;
+            this.tableName = configTableName;
             if (configTableName != null && !"".equals(configTableName.trim()) && table.length > 0) {
                 if (this.createTable(configTableName, BaseMySql.getDefaultTable(table))) {
                     plugin.getLogger().info("创建数据表" + configTableName + "成功");
