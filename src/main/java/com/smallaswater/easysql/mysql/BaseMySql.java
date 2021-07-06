@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -183,14 +184,8 @@ public abstract class BaseMySql {
      */
     public boolean createTable(String tableName, TableType... tableTypes) {
         if (!this.isExistTable(tableName)) {
-            StringBuilder builder = new StringBuilder("CREATE TABLE ").append(tableName).append("(");
-            /*for (TableType tableType : tableTypes) {
-                builder.append(tableType.toTable()).append(",");
-            }*/
-            builder.append(getDefaultTable(tableTypes));
-            //builder.deleteCharAt(builder.length()-1);
-            builder.append(")engine=InnoDB default charset=utf8");
-            return this.executeSql(builder.toString());
+            String command = "CREATE TABLE " + tableName + "(" + getDefaultTable(tableTypes) + ")engine=InnoDB default charset=utf8";
+            return this.executeSql(command);
         }
         return false;
     }
@@ -339,6 +334,20 @@ public abstract class BaseMySql {
             }
         }
         return i;
+    }
+
+    /**
+     * 获取数据
+     *
+     * @param tableName 表名称
+     * @param selectType 查询条件
+     * @return 数据
+     */
+    public SqlDataList<SqlData> getData(String tableName, SelectType selectType) {
+        ArrayList<ChunkSqlType> chunkSqlTypes = new ArrayList<>();
+        chunkSqlTypes.add(new ChunkSqlType(1, selectType.getValue()));
+        String command = "SELECT * FROM " + tableName + " " + selectType;
+        return this.getData(command, chunkSqlTypes.toArray(new ChunkSqlType[0]));
     }
 
     /**
