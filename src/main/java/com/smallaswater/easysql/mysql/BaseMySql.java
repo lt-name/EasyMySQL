@@ -4,6 +4,7 @@ package com.smallaswater.easysql.mysql;
 import cn.nukkit.plugin.Plugin;
 import com.smallaswater.easysql.EasySql;
 import com.smallaswater.easysql.exceptions.MySqlLoginException;
+import com.smallaswater.easysql.mysql.data.SqlData;
 import com.smallaswater.easysql.mysql.data.SqlDataManager;
 import com.smallaswater.easysql.mysql.manager.PluginManager;
 import com.smallaswater.easysql.mysql.utils.*;
@@ -13,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 
 /**
  * 数据库基类文件
@@ -115,8 +117,35 @@ public abstract class BaseMySql {
         }
     }
 
-    public boolean runSql(String sql, ChunkSqlType... value) {
+    /**
+     * 执行sql语句
+     *
+     * @param sql sql语句
+     * @param value 参数
+     * @return 是否执行成功
+     */
+    public boolean executeSql(String sql, ChunkSqlType... value) {
         return SqlDataManager.runSql(this.pool, sql, value);
+    }
+
+    /**
+     * 单执行MySQL函数
+     *
+     * @param functions 封装的函数
+     * @return 返回值
+     */
+    public SqlData executeFunction(MySqlFunctions functions) {
+        return SqlDataManager.executeFunction(this.pool, functions.getCommand());
+    }
+
+    /**
+     * 单执行MySQL函数
+     *
+     * @param functions 自定义的函数 例如 COUNT(*)
+     * @return 返回值
+     */
+    public SqlData executeFunction(String functions) {
+        return SqlDataManager.executeFunction(this.pool, functions);
     }
 
     /**
@@ -125,7 +154,7 @@ public abstract class BaseMySql {
      * @param tableName 表名称
      * @return 是否存在
      */
-    public boolean isExistForm(String tableName) {
+    public boolean isExistTable(String tableName) {
         try {
             ResultSet resultSet = this.getConnection().getMetaData().getTables(null, null, tableName, null);
             return resultSet.next();
@@ -146,7 +175,7 @@ public abstract class BaseMySql {
         try {
             ResultSet resultSet = this.getConnection().getMetaData().getTables(null, null, args[0], null);
             if (!resultSet.next()) {
-                this.runSql(command, new ChunkSqlType(1, args[1]));
+                this.executeSql(command, new ChunkSqlType(1, args[1]));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -162,7 +191,7 @@ public abstract class BaseMySql {
      */
     public void deleteTable(String tableName) {
         String sql = "DROP TABLE " + tableName;
-        this.runSql(sql);
+        this.executeSql(sql);
     }
 
     /**
@@ -191,7 +220,7 @@ public abstract class BaseMySql {
      */
     public boolean createColumn(Types types, String tableName, String args) {
         String command = "ALTER TABLE " + tableName + " ADD " + args + " " + types.toString();
-        return this.runSql(command);
+        return this.executeSql(command);
     }
 
     /**
@@ -203,7 +232,51 @@ public abstract class BaseMySql {
      */
     public boolean deleteColumn(String args, String tableName) {
         String command = "ALTER TABLE " + tableName + " DROP ?";
-        return this.runSql(command, new ChunkSqlType(1, args));
+        return this.executeSql(command, new ChunkSqlType(1, args));
+    }
+
+    public boolean isExistsData(String tableName, String column, String data) {
+        return SqlDataManager.isExists(this.pool, tableName, column, data);
+    }
+
+    /**
+     * 修改数据
+     *
+     * @param data  数据
+     * @param where 参数判断
+     * @param tableName 表单名称
+     * @return 是否修改成功
+     */
+    public boolean setData(SqlData data, SqlData where, String tableName) {
+        return SqlDataManager.setData(this.pool, data, where, tableName);
+    }
+
+    /**
+     * 添加数据
+     *
+     * @param data 数据
+     * @param tableName 表单名称
+     * @return 是否添加成功
+     */
+    public boolean insertData(SqlData data, String tableName) {
+        return SqlDataManager.insertData(this.pool, data, tableName);
+    }
+
+    /**
+     * 添加多条数据
+     *
+     * @param datas     数据列表
+     * @param tableName 表单名称
+     * @return 是否添加成功
+     */
+    public boolean insertData(LinkedList<SqlData> datas, String tableName) {
+        return SqlDataManager.insertData(this.pool, datas, tableName);
+    }
+
+
+
+    public boolean deleteData(SqlData data, String tableName) {
+        return SqlDataManager.deleteData(this.pool, data, tableName);
     }
 
     /**

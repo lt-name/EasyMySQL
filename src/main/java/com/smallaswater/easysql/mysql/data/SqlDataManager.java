@@ -217,30 +217,6 @@ public class SqlDataManager {
     }
 
     /**
-     * 删除数据
-     *
-     * @param data      数据
-     * @param tableName 表单名称
-     * @return 是否删除成功
-     */
-    public static boolean deleteData(LoginPool loginPool, SqlData data, String tableName) {
-        StringBuilder cmd = new StringBuilder("DELETE FROM " + tableName + " WHERE ");
-        ArrayList<ChunkSqlType> objects = new ArrayList<>();
-        int i = 0;
-        for (java.lang.String column : data.getData().keySet()) {
-            if (i >= 1) {
-                cmd.append(" and ").append(column).append(" = ?");
-            } else {
-                cmd.append(column).append(" = ?");
-            }
-            objects.add(new ChunkSqlType(i + 1, data.getData().get(column).toString()));
-            i++;
-        }
-
-        return runSql(loginPool, cmd.toString(), objects.toArray(new ChunkSqlType[]{}));
-    }
-
-    /**
      * 执行SQL语句
      *
      * @param sql   SQL 语句
@@ -283,6 +259,25 @@ public class SqlDataManager {
         return false;
     }
 
+    /**
+     * 单执行MySQL函数
+     *
+     * @param functions 封装的函数
+     * @return 返回值
+     */
+    public static SqlData executeFunction(LoginPool loginPool, MySqlFunctions functions) {
+        return selectExecute(loginPool, functions.getCommand()).get();
+    }
+
+    /**
+     * 单执行MySQL函数
+     *
+     * @param functions 自定义的函数 例如 COUNT(*)
+     * @return 返回值
+     */
+    public static SqlData executeFunction(LoginPool loginPool, String functions) {
+        return selectExecute(loginPool, functions).get();
+    }
 
     private static String getUpDataWhere(SqlData data) {
         StringBuilder builder = new StringBuilder();
@@ -318,7 +313,6 @@ public class SqlDataManager {
         String command = "SELECT * FROM information_schema.TABLES  WHERE table_schema =? AND table_name = ?";
         return selectExecute(loginPool, command, new ChunkSqlType(1, database), new ChunkSqlType(2, tableName)).size() == 0;
     }
-
 
     /**
      * 修改数据
@@ -368,24 +362,27 @@ public class SqlDataManager {
         return true;
     }
 
-
     /**
-     * 单执行MySQL函数
+     * 删除数据
      *
-     * @param functions 封装的函数
-     * @return 返回值
+     * @param data      数据
+     * @param tableName 表单名称
+     * @return 是否删除成功
      */
-    public static SqlData executeFunction(LoginPool loginPool, MySqlFunctions functions) {
-        return selectExecute(loginPool, functions.getCommand()).get();
-    }
+    public static boolean deleteData(LoginPool loginPool, SqlData data, String tableName) {
+        StringBuilder cmd = new StringBuilder("DELETE FROM " + tableName + " WHERE ");
+        ArrayList<ChunkSqlType> objects = new ArrayList<>();
+        int i = 0;
+        for (java.lang.String column : data.getData().keySet()) {
+            if (i >= 1) {
+                cmd.append(" and ").append(column).append(" = ?");
+            } else {
+                cmd.append(column).append(" = ?");
+            }
+            objects.add(new ChunkSqlType(i + 1, data.getData().get(column).toString()));
+            i++;
+        }
 
-    /**
-     * 单执行MySQL函数
-     *
-     * @param functions 自定义的函数 例如 COUNT(*)
-     * @return 返回值
-     */
-    public static SqlData executeFunction(LoginPool loginPool, String functions) {
-        return selectExecute(loginPool, functions).get();
+        return runSql(loginPool, cmd.toString(), objects.toArray(new ChunkSqlType[]{}));
     }
 }
