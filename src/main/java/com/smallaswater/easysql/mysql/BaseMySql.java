@@ -125,7 +125,7 @@ public abstract class BaseMySql {
      * @return 是否执行成功
      */
     public boolean executeSql(String sql, ChunkSqlType... value) {
-        return SqlDataManager.runSql(this.pool, sql, value);
+        return SqlDataManager.executeSql(this.pool, sql, value);
     }
 
     /**

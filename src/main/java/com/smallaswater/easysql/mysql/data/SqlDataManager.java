@@ -1,6 +1,7 @@
 package com.smallaswater.easysql.mysql.data;
 
 
+import cn.nukkit.Server;
 import com.smallaswater.easysql.mysql.utils.ChunkSqlType;
 import com.smallaswater.easysql.mysql.utils.LoginPool;
 import com.smallaswater.easysql.mysql.utils.MySqlFunctions;
@@ -180,23 +181,21 @@ public class SqlDataManager {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            return objects;
-
+            Server.getInstance().getLogger().error("执行 " + commands + " 语句出现异常", e);
         } finally {
-            try {
-                if (preparedStatement != null) {
+            if (preparedStatement != null) {
+                try {
                     preparedStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
-            try {
-                if (connection != null) {
+            if (connection != null) {
+                try {
                     connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
         }
         return objects;
@@ -224,7 +223,7 @@ public class SqlDataManager {
      * @return 是否执行成功
      * 通过线程池调用 Connection
      */
-    public static boolean runSql(LoginPool loginPool, String sql, ChunkSqlType... value) {
+    public static boolean executeSql(LoginPool loginPool, String sql, ChunkSqlType... value) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
@@ -238,22 +237,21 @@ public class SqlDataManager {
             return true;
 
         } catch (SQLException e) {
-            System.out.println("执行 " + sql + " 语句出现异常");
-            System.out.println(e.getMessage());
+            Server.getInstance().getLogger().error("执行 " + sql + " 语句出现异常", e);
         } finally {
-            try {
-                if (preparedStatement != null) {
+            if (preparedStatement != null) {
+                try {
                     preparedStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
-            try {
-                if (connection != null) {
+            if (connection != null) {
+                try {
                     connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
         }
         return false;
@@ -333,7 +331,7 @@ public class SqlDataManager {
         }
 
         String sql = "UPDATE " + tableName + " SET " + getUpDataColumn(data) + " WHERE " + getUpDataWhere(where);
-        return runSql(loginPool, sql, objects.toArray(new ChunkSqlType[]{}));
+        return executeSql(loginPool, sql, objects.toArray(new ChunkSqlType[]{}));
     }
 
     /**
@@ -358,7 +356,7 @@ public class SqlDataManager {
             chunkSqlTypes.add(new ChunkSqlType(i, String.valueOf(o)));
             i++;
         }
-        return runSql(loginPool, builder.toString(), chunkSqlTypes.toArray(new ChunkSqlType[0]));
+        return executeSql(loginPool, builder.toString(), chunkSqlTypes.toArray(new ChunkSqlType[0]));
     }
 
     /**
@@ -396,6 +394,6 @@ public class SqlDataManager {
             i++;
         }
 
-        return runSql(loginPool, cmd.toString(), objects.toArray(new ChunkSqlType[]{}));
+        return executeSql(loginPool, cmd.toString(), objects.toArray(new ChunkSqlType[]{}));
     }
 }
