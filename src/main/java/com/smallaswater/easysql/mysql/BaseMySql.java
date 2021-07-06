@@ -25,8 +25,6 @@ public abstract class BaseMySql {
 
     private final Plugin plugin;
 
-    protected String tableName;
-
     protected LoginPool pool;
 
     public BaseMySql(@NotNull Plugin plugin, @NotNull UserData data) {
@@ -107,32 +105,18 @@ public abstract class BaseMySql {
         }
     }
 
-
-    @Deprecated
-    public SqlDataManager getSqlDataManager(String form) {
-        return new SqlDataManager(this.data.getDatabase(), form, this.pool);
-    }
-
-    /**
-     * 真的没必要设置传入表名
-     * 可以通过直接查询里的封装方法
-     * */
-    public SqlDataManager getSqlDataManager() {
-        return new SqlDataManager(this.data.getDatabase(), tableName, this.pool);
-    }
-
-
-
     /**
      * 关闭数据库连接
      */
     public void shutdown() {
-        try {
-            this.pool.dataSource.getConnection().close();
+        if (this.pool != null) {
+            this.pool.dataSource.close();
             this.plugin.getLogger().info(" 已断开数据库连接");
-        } catch (SQLException var2) {
-            var2.printStackTrace();
         }
+    }
+
+    public boolean runSql(String sql, ChunkSqlType... value) {
+        return SqlDataManager.runSql(this.pool, sql, value);
     }
 
     /**
@@ -162,25 +146,10 @@ public abstract class BaseMySql {
         try {
             ResultSet resultSet = this.getConnection().getMetaData().getTables(null, null, args[0], null);
             if (!resultSet.next()) {
-                return this.getSqlDataManager(args[0]).runSql(command, new ChunkSqlType(1, args[1]));
+                this.runSql(command, new ChunkSqlType(1, args[1]));
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    @Deprecated
-    public boolean createTable(Connection connection, String... args) {
-        String command = "CREATE TABLE " + args[0] + "(?)engine=InnoDB default charset=utf8";
-        try {
-            ResultSet resultSet = connection.getMetaData().getTables(null, null, args[0], null);
-            if (!resultSet.next()) {
-                return this.getSqlDataManager(args[0]).runSql(command, new ChunkSqlType(1, args[1]));
-            }
-        } catch (SQLException var5) {
-            var5.printStackTrace();
         }
 
         return false;
@@ -193,12 +162,7 @@ public abstract class BaseMySql {
      */
     public void deleteTable(String tableName) {
         String sql = "DROP TABLE " + tableName;
-        this.getSqlDataManager("").runSql(sql);
-    }
-
-    @Deprecated
-    public void deleteField(String tableName) {
-        this.deleteTable(tableName);
+        this.runSql(sql);
     }
 
     /**
@@ -217,48 +181,29 @@ public abstract class BaseMySql {
         }
     }
 
-    @Deprecated
-    public boolean isColumn(String table, String column) {
-        return this.isExistColumn(table, column);
-    }
-
     /**
      * 给表增加字段
      *
-     * @param form  表单名
+     * @param tableName  表单名
      * @param types 字段参数
      * @param args  字段名
      * @return 增加一个字段
      */
-    public boolean createColumn(Types types, String form, String args) {
-        String command = "ALTER TABLE " + form + " ADD " + args + " " + types.toString();
-        return this.getSqlDataManager(form).runSql(command);
-    }
-
-    /**
-     * 给表增加字段
-     *
-     * @param types 字段参数
-     * @param args  字段名
-     * @return 增加一个字段
-     */
-    public boolean createColumn(Types types, String args) {
+    public boolean createColumn(Types types, String tableName, String args) {
         String command = "ALTER TABLE " + tableName + " ADD " + args + " " + types.toString();
-        return this.getSqlDataManager(tableName).runSql(command);
+        return this.runSql(command);
     }
-
-
 
     /**
      * 给表删除字段
      *
      * @param args 字段名
-     * @param form 表单名称
+     * @param tableName 表单名称
      * @return 删除一个字段
      */
-    public boolean deleteColumn(String args, String form) {
-        String command = "ALTER TABLE " + form + " DROP ?";
-        return this.getSqlDataManager(form).runSql(command, new ChunkSqlType(1, args));
+    public boolean deleteColumn(String args, String tableName) {
+        String command = "ALTER TABLE " + tableName + " DROP ?";
+        return this.runSql(command, new ChunkSqlType(1, args));
     }
 
     /**
@@ -266,11 +211,12 @@ public abstract class BaseMySql {
      */
     public int getDataSize(String sql, String form,ChunkSqlType... sqlType) {
         int i = 0;
-        ResultSet resultSet = null;
+        Connection connection = this.getConnection();
         PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         try {
-            preparedStatement = this.getConnection().prepareStatement("SELECT COUNT(*) FROM " + form + " " + sql);
-            for(ChunkSqlType type: sqlType){
+            preparedStatement = connection.prepareStatement("SELECT COUNT(*) FROM " + form + " " + sql);
+            for(ChunkSqlType type: sqlType) {
                 preparedStatement.setString(type.getI(),type.getValue());
             }
             resultSet = preparedStatement.executeQuery();
@@ -282,9 +228,9 @@ public abstract class BaseMySql {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (resultSet != null) {
+            if (connection != null) {
                 try {
-                    resultSet.close();
+                    connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -292,6 +238,13 @@ public abstract class BaseMySql {
             if (preparedStatement != null) {
                 try {
                     preparedStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

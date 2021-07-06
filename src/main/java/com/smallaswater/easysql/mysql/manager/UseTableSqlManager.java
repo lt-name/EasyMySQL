@@ -2,7 +2,6 @@ package com.smallaswater.easysql.mysql.manager;
 
 import cn.nukkit.plugin.Plugin;
 import com.smallaswater.easysql.exceptions.MySqlLoginException;
-import com.smallaswater.easysql.mysql.data.SqlDataManager;
 import com.smallaswater.easysql.mysql.utils.Types;
 import com.smallaswater.easysql.mysql.utils.UserData;
 import lombok.Getter;
@@ -22,17 +21,6 @@ public class UseTableSqlManager extends SqlManager {
         this.tableName = tableName;
     }
 
-    @Override
-    @Deprecated
-    public SqlDataManager getSqlManager() {
-        return super.getSqlDataManager(this.tableName);
-    }
-
-    @Override
-    public SqlDataManager getSqlDataManager() {
-        return super.getSqlDataManager(this.tableName);
-    }
-
     /**
      * 给表增加字段
      *
@@ -40,7 +28,6 @@ public class UseTableSqlManager extends SqlManager {
      * @param args  字段名
      * @return 增加一个字段
      */
-    @Override
     public boolean createColumn(Types types, String args) {
         return super.createColumn(types, this.tableName, args);
     }
@@ -49,6 +36,26 @@ public class UseTableSqlManager extends SqlManager {
     @Override
     public boolean createColumn(Types types, String form, String args) {
         return super.createColumn(types, form, args);
+    }
+
+    public void deleteTable() {
+        super.deleteTable(this.tableName);
+    }
+
+    @Deprecated //对于UseTableSqlManager来说不推荐使用此方法
+    @Override
+    public void deleteTable(String tableName) {
+        super.deleteTable(tableName);
+    }
+
+    public boolean isExistColumn(String column) {
+        return super.isExistColumn(this.tableName, column);
+    }
+
+    @Deprecated //对于UseTableSqlManager来说不推荐使用此方法
+    @Override
+    public boolean isExistColumn(String table, String column) {
+        return super.isExistColumn(table, column);
     }
 
     /**
@@ -63,17 +70,7 @@ public class UseTableSqlManager extends SqlManager {
 
     @Deprecated //对于UseTableSqlManager来说不推荐使用此方法
     @Override
-    public boolean deleteColumn(String args, String form) {
-        return super.deleteColumn(args, form);
-    }
-
-    public void deleteTable() {
-        super.deleteTable(this.tableName);
-    }
-
-    @Deprecated //对于UseTableSqlManager来说不推荐使用此方法
-    @Override
-    public void deleteTable(String tableName) {
-        super.deleteTable(tableName);
+    public boolean deleteColumn(String args, String tableName) {
+        return super.deleteColumn(args, tableName);
     }
 }
