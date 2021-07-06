@@ -7,6 +7,7 @@ import com.smallaswater.easysql.exceptions.MySqlLoginException;
 import com.smallaswater.easysql.mysql.data.SqlDataManager;
 import com.smallaswater.easysql.mysql.manager.PluginManager;
 import com.smallaswater.easysql.mysql.utils.*;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -106,6 +107,7 @@ public abstract class BaseMySql {
         }
     }
 
+
     /**
      * 获取 manager
      */
@@ -117,6 +119,15 @@ public abstract class BaseMySql {
     public SqlDataManager getSqlDataManager(String form) {
         return new SqlDataManager(this.data.getDatabase(), form, this.getConnection());
     }
+
+    /**
+     * 真的没必要设置传入表名
+     * 可以通过直接查询里的封装方法
+     * */
+    public SqlDataManager getSqlDataManager() {
+        return new SqlDataManager(this.data.getDatabase(), "", this.getConnection());
+    }
+
 
 
     /**
@@ -168,7 +179,7 @@ public abstract class BaseMySql {
 
     @Deprecated
     public boolean createTable(Connection connection, String... args) {
-        String command = "CREATE TABLE " + args[0] + "(?)engine=InnoDB default charset=utf8";
+        @Language("SQL") String command = "CREATE TABLE " + args[0] + "(?)engine=InnoDB default charset=utf8";
         try {
             ResultSet resultSet = connection.getMetaData().getTables(null, null, args[0], null);
             if (!resultSet.next()) {
@@ -245,12 +256,15 @@ public abstract class BaseMySql {
     /**
      * 获取数据条数
      */
-    public int getDataSize(String sql, String form) {
+    public int getDataSize(String sql, String form,ChunkSqlType... sqlType) {
         int i = 0;
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = this.getConnection().prepareStatement("SELECT COUNT(*) FROM " + form + " " + sql);
+            for(ChunkSqlType type: sqlType){
+                preparedStatement.setString(type.getI(),type.getValue());
+            }
             resultSet = preparedStatement.executeQuery();
             if (resultSet != null) {
                 if (resultSet.next()) {

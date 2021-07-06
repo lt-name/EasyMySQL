@@ -3,6 +3,7 @@ package com.smallaswater.easysql.mysql.data;
 
 import com.smallaswater.easysql.mysql.utils.ChunkSqlType;
 import com.smallaswater.easysql.mysql.utils.MySqlFunctions;
+import org.intellij.lang.annotations.Language;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -161,9 +162,11 @@ public class SqlDataManager {
      * 执行查询SQL指令
      *
      * @param types    防SQL注入参数
-     * @param commands sql语句
+     * @param commands @Language("SQL")
+     *
+     *
      */
-    public SqlDataList<SqlData> selectExecute(String commands, ChunkSqlType... types) {
+    public SqlDataList<SqlData> selectExecute(@Language("SQL") String commands, ChunkSqlType... types) {
         SqlDataList<SqlData> objects = new SqlDataList<>(commands, types);
         Connection connection = this.connection;
         try {
@@ -296,7 +299,7 @@ public class SqlDataManager {
      * @param value 防SQL注入
      * @return 是否执行成功
      */
-    public boolean runSql(String sql, ChunkSqlType... value) {
+    public boolean runSql(@Language("SQL") String sql, ChunkSqlType... value) {
         Connection connection = this.connection;
         try {
             this.preparedStatement = connection.prepareStatement(sql);

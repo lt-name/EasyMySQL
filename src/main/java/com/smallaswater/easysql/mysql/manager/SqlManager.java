@@ -35,7 +35,7 @@ public class SqlManager extends BaseMySql {
         super(plugin, data);
         if (this.connect()) {
             this.isEnable = true;
-            if (configTableName != null && !configTableName.trim().equals("") && table.length > 0) {
+            if (configTableName != null && !"".equals(configTableName.trim()) && table.length > 0) {
                 if (this.createTable(configTableName, BaseMySql.getDefaultTable(table))) {
                     plugin.getLogger().info("创建数据表" + configTableName + "成功");
                 }
