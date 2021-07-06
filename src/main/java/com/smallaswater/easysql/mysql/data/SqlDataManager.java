@@ -340,12 +340,25 @@ public class SqlDataManager {
      * 添加数据
      *
      * @param data 数据
+     * @param tableName 表单名称
+     * @return 是否添加成功
      */
     public static boolean insertData(LoginPool loginPool, SqlData data, String tableName) {
         String column = data.getColumnToString();
         String values = data.getObjectToString();
-        String sql = "INSERT INTO " + tableName + " (" + column + ") VALUES (?)";
-        return runSql(loginPool, sql, new ChunkSqlType(1, values));
+        StringBuilder builder = new StringBuilder("INSERT INTO ").append(tableName).append(" (").append(column).append(") VALUES (");
+        builder.append("?");
+        for (int i=1; i<data.getColumns().size(); i++) {
+            builder.append(",?");
+        }
+        builder.append(")");
+        ArrayList<ChunkSqlType> chunkSqlTypes = new ArrayList<>();
+        int i = 1;
+        for (Object o : data.getObjects()) {
+            chunkSqlTypes.add(new ChunkSqlType(i, String.valueOf(o)));
+            i++;
+        }
+        return runSql(loginPool, builder.toString(), chunkSqlTypes.toArray(new ChunkSqlType[0]));
     }
 
     /**
