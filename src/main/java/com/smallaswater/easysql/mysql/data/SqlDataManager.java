@@ -81,7 +81,7 @@ public class SqlDataManager {
         if (form != null && !"".equalsIgnoreCase(form)) {
             tableName = form;
         }
-        @Language("SQL") String sql = "SELECT " + column + " FROM " + tableName;
+        String sql = "SELECT " + column + " FROM " + tableName;
         if (where != null && !"".equalsIgnoreCase(where)) {
             sql = sql + " WHERE " + where;
         }
@@ -100,7 +100,6 @@ public class SqlDataManager {
         if (orderBy != null && !"".equalsIgnoreCase(orderBy)) {
             sql = sql + " ORDER BY " + orderBy;
         }
-
 
         return selectExecute(sql, types);
     }
@@ -165,12 +164,11 @@ public class SqlDataManager {
      * @param types    防SQL注入参数
      * @param commands @Language("SQL")
      *
-     *
-     *this.c
      */
-    public SqlDataList<SqlData> selectExecute(@Language("SQL") String commands, ChunkSqlType... types) {
+    public SqlDataList<SqlData> selectExecute(String commands, ChunkSqlType... types) {
         SqlDataList<SqlData> objects = new SqlDataList<>(commands, types);
         Connection connection;
+        System.out.println(commands);
         try {
             connection = this.loginPool.dataSource.getConnection();
             this.preparedStatement = connection.prepareStatement(commands);
@@ -218,7 +216,7 @@ public class SqlDataManager {
      * @return 是否存在
      */
     public boolean isExists(String column, String data) {
-        @Language("SQL") String sql = "SELECT " + MySqlFunctions.getFunction(MySqlFunctions.SqlFunctions.COUNT, "*") + " c FROM " + tableName + " WHERE " + column + " = ?";
+        String sql = "SELECT " + MySqlFunctions.getFunction(MySqlFunctions.SqlFunctions.COUNT, "*") + " c FROM " + tableName + " WHERE " + column + " = ?";
         return selectExecute(sql, new ChunkSqlType(1, data)).get().getInt("c") > 0;
     }
 
@@ -303,7 +301,7 @@ public class SqlDataManager {
      * @return 是否执行成功
      * 通过线程池调用 Connection
      */
-    public boolean runSql(@Language("SQL") String sql, ChunkSqlType... value) {
+    public boolean runSql(String sql, ChunkSqlType... value) {
         Connection connection;
         try {
              connection = this.loginPool.dataSource.getConnection();
@@ -372,7 +370,7 @@ public class SqlDataManager {
         if (database != null && !"".equalsIgnoreCase(database)) {
             data = database;
         }
-        @Language("SQL") String command = "SELECT * FROM information_schema.TABLES  WHERE table_schema =? AND table_name = ?";
+        String command = "SELECT * FROM information_schema.TABLES  WHERE table_schema =? AND table_name = ?";
         return selectExecute(command, new ChunkSqlType(1, data), new ChunkSqlType(2, tableName)).size() == 0;
     }
 
@@ -395,7 +393,7 @@ public class SqlDataManager {
             i++;
         }
 
-        @Language("SQL") String sql = "UPDATE " + tableName + " SET " + getUpDataColumn(data) + " WHERE " + getUpDataWhere(where);
+        String sql = "UPDATE " + tableName + " SET " + getUpDataColumn(data) + " WHERE " + getUpDataWhere(where);
         return runSql(sql, objects.toArray(new ChunkSqlType[]{}));
     }
 
