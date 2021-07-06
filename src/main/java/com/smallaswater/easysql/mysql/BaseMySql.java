@@ -224,12 +224,11 @@ public abstract class BaseMySql {
      * 给表增加字段
      *
      * @param tableName  表单名
-     * @param types 字段参数
-     * @param args  字段名
-     * @return 增加一个字段
+     * @param tableType 字段参数
+     * @return 是否成功
      */
-    public boolean createColumn(Types types, String tableName, String args) {
-        String command = "ALTER TABLE " + tableName + " ADD " + args + " " + types.toString();
+    public boolean createColumn(String tableName, TableType tableType) {
+        String command = "ALTER TABLE " + tableName + " ADD " + tableType.getName() + " " + tableType.getType().toString();
         return this.executeSql(command);
     }
 
