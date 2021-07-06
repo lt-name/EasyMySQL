@@ -5,6 +5,7 @@ import cn.nukkit.plugin.Plugin;
 import com.smallaswater.easysql.exceptions.MySqlLoginException;
 import com.smallaswater.easysql.mysql.BaseMySql;
 import com.smallaswater.easysql.mysql.manager.SqlManager;
+import com.smallaswater.easysql.mysql.manager.UseTableSqlManager;
 import com.smallaswater.easysql.mysql.utils.TableType;
 import com.smallaswater.easysql.mysql.utils.UserData;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ public class SqlEnable {
     @Deprecated
     public SqlEnable(@NotNull Plugin plugin, String tableName, UserData data, TableType... table) throws MySqlLoginException {
         this.data = data;
-        this.manager = new SqlManager(plugin,tableName, data);
+        this.manager = new UseTableSqlManager(plugin, data, tableName);
         if (tableName != null && !"".equals(tableName.trim()) && table.length > 0) {
             if (this.manager.createTable(tableName, BaseMySql.getDefaultTable(table))) {
                 plugin.getLogger().info("创建数据表" + tableName + "成功");

@@ -7,7 +7,6 @@ import com.smallaswater.easysql.exceptions.MySqlLoginException;
 import com.smallaswater.easysql.mysql.data.SqlDataManager;
 import com.smallaswater.easysql.mysql.manager.PluginManager;
 import com.smallaswater.easysql.mysql.utils.*;
-import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -109,24 +108,9 @@ public abstract class BaseMySql {
     }
 
 
-    /**
-     * 获取 manager
-     */
     @Deprecated
-    public SqlDataManager getSqlManager(String form) {
-        return this.getSqlDataManager(form);
-    }
-
     public SqlDataManager getSqlDataManager(String form) {
         return new SqlDataManager(this.data.getDatabase(), form, this.pool);
-    }
-
-    /**
-     * 保留旧版方法
-     * */
-    @Deprecated
-    public SqlDataManager getSqlManager() {
-        return new SqlDataManager(this.data.getDatabase(), tableName, this.pool);
     }
 
     /**
@@ -193,7 +177,7 @@ public abstract class BaseMySql {
         try {
             ResultSet resultSet = connection.getMetaData().getTables(null, null, args[0], null);
             if (!resultSet.next()) {
-                return getSqlManager(args[0]).runSql(command, new ChunkSqlType(1, args[1]));
+                return this.getSqlDataManager(args[0]).runSql(command, new ChunkSqlType(1, args[1]));
             }
         } catch (SQLException var5) {
             var5.printStackTrace();
