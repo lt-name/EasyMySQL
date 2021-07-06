@@ -163,24 +163,34 @@ public abstract class BaseMySql {
         }
     }
 
-
     /**
-     * 创建表单 SQL指令 每个args代表指令中的 ?
+     * 创建表单
      *
-     * @param args       参数
+     * @param tableName 表名称
      * @return 是否创建成功
      */
-    public boolean createTable(String... args) {
-        String command = "CREATE TABLE " + args[0] + "(?)engine=InnoDB default charset=utf8";
-        try {
-            ResultSet resultSet = this.getConnection().getMetaData().getTables(null, null, args[0], null);
-            if (!resultSet.next()) {
-                this.executeSql(command, new ChunkSqlType(1, args[1]));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public boolean createTable(String tableName) {
+        return this.createTable(tableName, new TableType("id", Types.ID));
+    }
 
+    /**
+     * 创建表单
+     *
+     * @param tableName 表名称
+     * @param tableTypes 参数
+     * @return 是否创建成功
+     */
+    public boolean createTable(String tableName, TableType... tableTypes) {
+        if (!this.isExistTable(tableName)) {
+            StringBuilder builder = new StringBuilder("CREATE TABLE ").append(tableName).append("(");
+            /*for (TableType tableType : tableTypes) {
+                builder.append(tableType.toTable()).append(",");
+            }*/
+            builder.append(getDefaultTable(tableTypes));
+            //builder.deleteCharAt(builder.length()-1);
+            builder.append(")engine=InnoDB default charset=utf8");
+            return this.executeSql(builder.toString());
+        }
         return false;
     }
 
