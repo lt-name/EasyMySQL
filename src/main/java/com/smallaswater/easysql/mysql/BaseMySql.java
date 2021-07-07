@@ -2,6 +2,9 @@ package com.smallaswater.easysql.mysql;
 
 
 import cn.nukkit.plugin.Plugin;
+import com.alibaba.druid.filter.Filter;
+import com.alibaba.druid.wall.WallConfig;
+import com.alibaba.druid.wall.WallFilter;
 import com.smallaswater.easysql.EasySql;
 import com.smallaswater.easysql.exceptions.MySqlLoginException;
 import com.smallaswater.easysql.mysql.data.SqlData;
@@ -75,6 +78,19 @@ public abstract class BaseMySql {
             this.pool.dataSource.setValidationQuery("SELECT 1");
             this.pool.dataSource.setTimeBetweenEvictionRunsMillis(1800);
 
+            //TODO 增加设置，允许用户自定义
+            this.pool.dataSource.addFilters("wall");
+            for (Filter filter : this.pool.dataSource.getProxyFilters()) {
+                if (filter instanceof WallFilter) {
+                    WallFilter wallFilter = (WallFilter) filter;
+                    WallConfig config = new WallConfig();
+                    wallFilter.setConfig(config);
+                    wallFilter.init(this.pool.dataSource);
+                    plugin.getLogger().info(wallFilter.isInited() ? "wall enable!" : "wall error!");
+                }
+            }
+
+            //TODO 修复链接判断
             connection = this.getConnection();
             if (connection != null) {
                 plugin.getLogger().info("已连接数据库");
