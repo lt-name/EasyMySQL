@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author 楠木i, 若水
  */
+@Deprecated
 public class SqlEnable {
 
     private final SqlManager manager;

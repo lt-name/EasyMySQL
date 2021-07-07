@@ -87,7 +87,6 @@ public abstract class BaseMySql {
             e.printStackTrace();
             plugin.getLogger().info("连接数据库出现异常...");
         } finally {
-
             if (connection != null) {
                 try {
                     connection.close();
@@ -240,6 +239,14 @@ public abstract class BaseMySql {
         return this.executeSql(command, new ChunkSqlType(1, args));
     }
 
+    /**
+     * 是否有数据
+     *
+     * @param tableName 表名称
+     * @param column 条件:字段
+     * @param data 条件:值
+     * @return 是否存在数据
+     */
     public boolean isExistsData(String tableName, String column, String data) {
         return SqlDataManager.isExists(this.pool, tableName, column, data);
     }
@@ -353,12 +360,12 @@ public abstract class BaseMySql {
     /**
      * 获取数据
      *
-     * @param command 执行查询SQL指令
+     * @param sql 执行查询SQL指令
      * @param types 参数
      * @return 数据
      */
-    public SqlDataList<SqlData> getData(String command, ChunkSqlType... types) {
-        return SqlDataManager.selectExecute(this.pool, command, types);
+    public SqlDataList<SqlData> getData(String sql, ChunkSqlType... types) {
+        return SqlDataManager.selectExecute(this.pool, sql, types);
     }
 
 }
