@@ -1,6 +1,6 @@
-package com.smallaswater.easysql.mysql.data;
+package com.smallaswater.easysql.v3.mysql.data;
 
-import com.smallaswater.easysql.mysql.utils.ChunkSqlType;
+import com.smallaswater.easysql.v3.mysql.utils.ChunkSqlType;
 
 import java.util.LinkedList;
 

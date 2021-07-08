@@ -1,17 +1,17 @@
-package com.smallaswater.easysql.mysql;
+package com.smallaswater.easysql.v3.mysql;
 
 
 import cn.nukkit.plugin.Plugin;
 import com.alibaba.druid.filter.Filter;
 import com.alibaba.druid.wall.WallConfig;
 import com.alibaba.druid.wall.WallFilter;
-import com.smallaswater.easysql.EasySql;
-import com.smallaswater.easysql.exceptions.MySqlLoginException;
-import com.smallaswater.easysql.mysql.data.SqlData;
-import com.smallaswater.easysql.mysql.data.SqlDataList;
-import com.smallaswater.easysql.mysql.data.SqlDataManager;
-import com.smallaswater.easysql.mysql.manager.PluginManager;
-import com.smallaswater.easysql.mysql.utils.*;
+import com.smallaswater.easysql.v3.exceptions.MySqlLoginException;
+import com.smallaswater.easysql.v3.mysql.data.SqlData;
+import com.smallaswater.easysql.v3.mysql.data.SqlDataList;
+import com.smallaswater.easysql.v3.mysql.data.SqlDataManager;
+import com.smallaswater.easysql.v3.mysql.manager.PluginManager;
+import com.smallaswater.easysql.v3.mysql.utils.*;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -32,6 +32,7 @@ public abstract class BaseMySql {
 
     private final Plugin plugin;
 
+    @Getter
     protected LoginPool pool;
 
     public BaseMySql(@NotNull Plugin plugin, @NotNull UserData data) {
@@ -66,7 +67,7 @@ public abstract class BaseMySql {
         Connection connection = null;
 
         try {
-            this.pool = EasySql.getLoginPool(data);
+            this.pool = new LoginPool(data.getHost(), data.getUser(), data.getDatabase());
             Class.forName("com.mysql.cj.jdbc.Driver");
             this.pool.dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
             this.pool.dataSource.setUrl("jdbc:mysql://" + this.data.getHost() + ':' + this.data.getPort() + '/' + this.data.getDatabase() + "?&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT&characterEncoding=utf8&useSSL=false");

@@ -1,9 +1,9 @@
-package com.smallaswater.easysql.mysql.manager;
+package com.smallaswater.easysql.v3.mysql.manager;
 
 import cn.nukkit.plugin.Plugin;
-import com.smallaswater.easysql.exceptions.MySqlLoginException;
-import com.smallaswater.easysql.mysql.utils.TableType;
-import com.smallaswater.easysql.mysql.utils.UserData;
+import com.smallaswater.easysql.v3.exceptions.MySqlLoginException;
+import com.smallaswater.easysql.v3.mysql.utils.TableType;
+import com.smallaswater.easysql.v3.mysql.utils.UserData;
 import lombok.Getter;
 
 /**

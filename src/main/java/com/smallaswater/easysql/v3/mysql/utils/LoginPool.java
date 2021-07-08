@@ -1,7 +1,7 @@
-package com.smallaswater.easysql.mysql.utils;
+package com.smallaswater.easysql.v3.mysql.utils;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.smallaswater.easysql.mysql.manager.SqlManager;
+import com.smallaswater.easysql.v3.mysql.manager.SqlManager;
 
 /**
  * @author SmallasWater

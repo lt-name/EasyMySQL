@@ -1,8 +1,8 @@
-package com.smallaswater.easysql.mysql.manager;
+package com.smallaswater.easysql.v3.mysql.manager;
 
 
 import cn.nukkit.plugin.Plugin;
-import com.smallaswater.easysql.mysql.BaseMySql;
+import com.smallaswater.easysql.v3.mysql.BaseMySql;
 
 import java.util.ArrayList;
 import java.util.HashMap;

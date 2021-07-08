@@ -6,7 +6,7 @@
 
     <groupId>com.smallaswater.easysql</groupId>
     <artifactId>EasyMySQL</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>lib-3.0.0-SNAPSHOT</version>
 
     <repositories>
         <repository>

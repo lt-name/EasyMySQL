@@ -1,4 +1,4 @@
-package com.smallaswater.easysql.exceptions;
+package com.smallaswater.easysql.v3.exceptions;
 
 /**
  * @author SmallasWater

@@ -1,4 +1,4 @@
-package com.smallaswater.easysql.mysql.data;
+package com.smallaswater.easysql.v3.mysql.data;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;

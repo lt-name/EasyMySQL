@@ -1,10 +1,10 @@
-package com.smallaswater.easysql.mysql.data;
+package com.smallaswater.easysql.v3.mysql.data;
 
 
 import cn.nukkit.Server;
-import com.smallaswater.easysql.mysql.utils.ChunkSqlType;
-import com.smallaswater.easysql.mysql.utils.LoginPool;
-import com.smallaswater.easysql.mysql.utils.MySqlFunctions;
+import com.smallaswater.easysql.v3.mysql.utils.ChunkSqlType;
+import com.smallaswater.easysql.v3.mysql.utils.LoginPool;
+import com.smallaswater.easysql.v3.mysql.utils.MySqlFunctions;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
