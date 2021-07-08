@@ -77,23 +77,15 @@ public abstract class BaseMySql {
             this.pool.dataSource.setMaxActive(30);
             this.pool.dataSource.setValidationQuery("SELECT 1");
             this.pool.dataSource.setTimeBetweenEvictionRunsMillis(1800);
-
-            //TODO 增加设置，允许用户自定义
+            this.pool.dataSource.setBreakAfterAcquireFailure(true);
+            this.pool.dataSource.setTimeBetweenConnectErrorMillis(1800);
+            this.pool.dataSource.setConnectionErrorRetryAttempts(3);
             this.pool.dataSource.addFilters("wall");
-            for (Filter filter : this.pool.dataSource.getProxyFilters()) {
-                if (filter instanceof WallFilter) {
-                    WallFilter wallFilter = (WallFilter) filter;
-                    WallConfig config = new WallConfig();
-                    wallFilter.setConfig(config);
-                    wallFilter.init(this.pool.dataSource);
-                    plugin.getLogger().info(wallFilter.isInited() ? "wall enable!" : "wall error!");
-                }
-            }
 
             //TODO 修复链接判断
             connection = this.getConnection();
             if (connection != null) {
-                plugin.getLogger().info("已连接数据库");
+                this.plugin.getLogger().info("已连接数据库");
                 PluginManager.connect(plugin, this);
                 return true;
             } else {
@@ -112,7 +104,39 @@ public abstract class BaseMySql {
             }
         }
         throw new MySqlLoginException();
+    }
 
+    /**
+     * 启用WallFilter
+     *
+     * @return 是否启用成功
+     */
+    public boolean enableWallFilter() {
+        for (Filter filter : this.pool.dataSource.getProxyFilters()) {
+            if (filter instanceof WallFilter) {
+                WallFilter wallFilter = (WallFilter) filter;
+                WallConfig config = new WallConfig();
+                wallFilter.setConfig(config);
+                wallFilter.init(this.pool.dataSource);
+                return wallFilter.isInited();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取WallFilter配置
+     *
+     * @return WallFilter配置
+     */
+    public WallConfig getWallFilterConfig() {
+        for (Filter filter : this.pool.dataSource.getProxyFilters()) {
+            if (filter instanceof WallFilter) {
+                WallFilter wallFilter = (WallFilter) filter;
+                return wallFilter.getConfig();
+            }
+        }
+        return null;
     }
 
     public Connection getConnection() {
